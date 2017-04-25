@@ -17,21 +17,38 @@ public class QNPay {
 	public var appKey = "c4ca4238a0b923820dcc509a6f75849b"
 	public var appId = 1
 	public var originUserId = "1"
+	public var iapPassword = "e8be13b9f28045808294e40240deaf95"
+	public var headers:[String:String] = [:]
+	
+	var pay:CLPay = CLPay.shareInstance
 	
 	var notiBag:CLNotificationBag = CLNotificationBag()
 	
-	public func registerQueue(notify: @escaping (Bool, QNOrder)->()) {
+	public enum Result {
+		case success
+		case faild
+		case timeout
+	}
+	
+	public func registerQueue(notify: @escaping (Result, QNOrder)->()) {
 		let q = QNOrderQueue.shareInstance
 		q.check()
 		
+		_ = pay.register()
+		
 		NotificationCenter.received(Notification.Name.orderQueueFaild) { (order) in
 			//收到订单正确的信息
-			notify(true, QNOrder(dict: order as! [String : Any])!)
+			notify(.success, QNOrder(dict: order as! [String : Any])!)
 		}.addBag(notiBag)
 		
 		_ = NotificationCenter.received(Notification.Name.orderQueueFaild) { (order) in
 			//收到订单错误的信息
-			notify(false, QNOrder(dict: order as! [String : Any])!)
+			notify(.faild, QNOrder(dict: order as! [String : Any])!)
+		}.addBag(notiBag)
+		
+		_ = NotificationCenter.received(Notification.Name.orderQueueTimeout) { (order) in
+			//收到订单错误的信息
+			notify(.timeout, QNOrder(dict: order as! [String : Any])!)
 		}.addBag(notiBag)
 	}
 }
@@ -39,9 +56,14 @@ public class QNPay {
 public enum QNPayError  : Error{
 	case hasNotTrust
 	case payChannelNotExists
+	case iapError
+	case iapCanNotFindReceipt
+	case iapReceiptContentError
+	case iapReceiptJsonError
 }
 
 public extension Notification.Name {
 	public static let orderQueueSuccess = "orderQueueSuccess"
 	public static let orderQueueFaild = "orderQueueFaild"
+	public static let orderQueueTimeout = "orderQueueTimeout"
 }

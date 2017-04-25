@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Coastline
 
 public class QNOrderQueue {
 	public static var shareInstance:QNOrderQueue = { QNOrderQueue() }()
@@ -40,6 +41,11 @@ public class QNOrderQueue {
 	
 	func checkState(order:QNOrder) {
 		guard let oid = order.create?.orderId else { return }
+		guard let valid = order.create?.valid, valid < Date().timeIntervalSince1970 else {
+			NotificationCenter.send(Notification.Name.orderQueueTimeout, userInfo: order.dict)
+			self.remove(orderId: oid)
+			return
+		}
 		
 		let q = QNQuery.shareInstance
 		q.orderCheck(orderId: oid) {  [weak self, order, oid] (dict, error) in
@@ -113,6 +119,48 @@ public class QNOrderQueue {
 			
 			self?.waitingList.append(order)
 			resp(nil)
+		}
+	}
+	
+	static func iapGetReceipt() -> (String?, Error?) {
+		guard let url = Bundle.main.appStoreReceiptURL else {
+			return (nil, QNPayError.iapCanNotFindReceipt)
+		}
+		
+		guard let data = try? Data(contentsOf: url) else {
+			return (nil, QNPayError.iapReceiptContentError)
+		}
+		
+		let code = data.base64EncodedString()
+		return (code, nil)
+	}
+	
+	public func payIAP(order:QNOrder, aid:String, payType:String = "iap", resp:@escaping(Error?)->()) {
+		let  p = QNPay.shareInstance.pay
+		p.buyProduct(pid: aid) { [weak self] (result) in
+			switch result {
+			case .faild(let error):
+				print("pay error", error)
+				resp(QNPayError.iapError)
+			case .success(productId: _, transaction: _):
+				let receipt = QNOrderQueue.iapGetReceipt()
+				if let code = receipt.0 {
+					let d = [
+						"password": QNPay.shareInstance.iapPassword,
+						"receipt-data": code
+					]
+					guard let receipt = (try? JSONSerialization.data(withJSONObject: d, options: []))?.string else {
+						resp(QNPayError.iapReceiptJsonError)
+						return
+					}
+					
+					self?.pay(order: order, payType: payType, receipt: receipt, resp: { (error) in
+						resp(error)
+					})
+				} else {
+					resp(receipt.1)
+				}
+			}
 		}
 	}
 	
