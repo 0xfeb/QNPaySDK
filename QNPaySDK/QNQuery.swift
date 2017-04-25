@@ -60,8 +60,14 @@ public class QNQuery {
 		}
 		
 		if method == "GET" {
+			print("GET ----->", url.absoluteString)
+			
 			let request = url.request
 			NSURLConnection.sendAsynchronousRequest(request, queue: OperationQueue(), completionHandler: { (response, data, error) in
+				if let d = data?.prettyJsonString {
+					print("==", d)
+				}
+		
 				if let data = data, let json = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions()) {
 					resp(json as? [AnyHashable:Any], nil)
 				} else {
@@ -69,12 +75,18 @@ public class QNQuery {
 				}
 			})
 		} else {
+			print("POST ----->", url.absoluteString)
+			
 			let request = NSMutableURLRequest(url: url)
 			request.httpMethod = method
 			request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 			request.httpBody = body
 			
 			NSURLConnection.sendAsynchronousRequest(request as URLRequest, queue: OperationQueue(), completionHandler: { (response, data, error) in
+				if let d = data?.prettyJsonString {
+					print("==", d)
+				}
+				
 				if let data = data, let json = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions()) {
 					resp(json as? [AnyHashable:Any], nil)
 				} else {

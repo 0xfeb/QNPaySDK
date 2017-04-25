@@ -14,12 +14,4 @@ target 'QNPaySDK' do
 end
 
 
-target 'PayTest' do
-	  use_frameworks!
-	
-	pod 'Coastline'
-	project 'PayTest/PayTest'
-end
-
-
 workspace 'QNPaySDK'
