@@ -63,7 +63,7 @@ public class QNOrderQueue {
 	
 	public func check() {
 		checkTimer?.invalidate()
-		checkTimer = Timer.scheduledTimer(timeInterval: 10.0, target: self, selector: #selector(checkAction), userInfo: nil, repeats: true)
+		checkTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(checkAction), userInfo: nil, repeats: true)
 	}
 	
 	@objc func checkAction() {
@@ -117,6 +117,8 @@ public class QNOrderQueue {
 	
 	public func trustPay(order:QNOrder, payType:String, container:UIViewController) -> Bool {
 		guard let trust = order.create?.trust else { return false }
+		
+		waitingList.append(order)
 		
 		let q = QNQuery.shareInstance
 		let urlString = q.trustUrl(trust: trust, payType: payType)
