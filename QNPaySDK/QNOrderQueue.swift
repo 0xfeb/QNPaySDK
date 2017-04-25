@@ -158,7 +158,7 @@ public class QNOrderQueue {
 						return
 					}
 					
-					self?.pay(order: order, payType: payType, receipt: receipt, resp: { (error) in
+					self?.pay(order: order, payType: payType, receipt: receipt.base64Enc!, resp: { (error) in
 						container?.endWaiting()
 						resp(error)
 					})
