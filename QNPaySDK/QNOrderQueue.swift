@@ -84,7 +84,7 @@ public class QNOrderQueue {
 			var order = QNOrder(start: start)
 			
 			if let orderId = data["order_id"] as? String, let trust = data["trust"] as? String, let pt = data["pay"] as? [[String:Any]], let ti = data["valid"] as? Int {
-				let create = QNOrder.Create(orderId: orderId, trust: trust, valid:Double(ti)*1000)
+				let create = QNOrder.Create(orderId: orderId, trust: trust, valid:Double(ti))
 				print(Date(timeIntervalSince1970: create.valid))
 				order.create = create
 				let pts = pt.flatMap{ QNPayType(dict:$0) }

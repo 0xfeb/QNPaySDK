@@ -49,7 +49,7 @@ public struct QNOrder {
 		start = Start(appId: ai, originOrderId: ooi, uid: ui, content: c, price: p)
 		
 		if let oi = dict["orderId"] as? String, let t = dict["trust"] as? String, let ti = dict["valid"] as? Int {
-			create = Create(orderId: oi, trust: t, valid:Double(ti)*1000)
+			create = Create(orderId: oi, trust: t, valid:Double(ti))
 		}
 		
 		if let pc = dict["pay_type"] as? [String:Any], let pt = QNPayType(dict: pc) {
