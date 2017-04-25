@@ -98,6 +98,15 @@ extension QNWebVC : UIWebViewDelegate {
 		
 		return webView.redirect(show: showWebView, hide: hideWebView, request: request) { (request) -> UIWebView.Direct? in
 			
+			if let scheme = request.url?.scheme, scheme != "http", scheme != "https" {
+				if checkShemeCanOpen(scheme: scheme) {
+					UIApplication.shared.openURL(request.url!)
+					return .stop
+				} else {
+					return .show
+				}
+			}
+			
 			return nil
 		}
 	}
