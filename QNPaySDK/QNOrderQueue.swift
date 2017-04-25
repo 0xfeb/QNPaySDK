@@ -63,7 +63,7 @@ public class QNOrderQueue {
 	
 	public func check() {
 		checkTimer?.invalidate()
-		checkTimer = Timer(timeInterval: 10.0, target: self, selector: #selector(checkAction), userInfo: nil, repeats: true)
+		checkTimer = Timer.scheduledTimer(timeInterval: 10.0, target: self, selector: #selector(checkAction), userInfo: nil, repeats: true)
 	}
 	
 	@objc func checkAction() {
