@@ -101,6 +101,7 @@ extension QNWebVC : UIWebViewDelegate {
 			if let scheme = request.url?.scheme, scheme != "http", scheme != "https" {
 				if checkShemeCanOpen(scheme: scheme) {
 					UIApplication.shared.openURL(request.url!)
+					self.dismiss(animated: true, completion: nil)
 					return .stop
 				} else {
 					return .show
