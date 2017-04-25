@@ -135,11 +135,14 @@ public class QNOrderQueue {
 		return (code, nil)
 	}
 	
-	public func payIAP(order:QNOrder, aid:String, payType:String = "iap", resp:@escaping(Error?)->()) {
+	public func payIAP(order:QNOrder, aid:String, payType:String = "iap", container:UIView?, resp:@escaping(Error?)->()) {
+		container?.startWaiting(title: "等待苹果支付队列")
+		
 		let  p = QNPay.shareInstance.pay
-		p.buyProduct(pid: aid) { [weak self] (result) in
+		p.buyProduct(pid: aid) { [weak self, weak container] (result) in
 			switch result {
 			case .faild(let error):
+				container?.endWaiting()
 				print("pay error", error)
 				resp(QNPayError.iapError)
 			case .success(productId: _, transaction: _):
@@ -150,14 +153,17 @@ public class QNOrderQueue {
 						"receipt-data": code
 					]
 					guard let receipt = (try? JSONSerialization.data(withJSONObject: d, options: []))?.string else {
+						container?.endWaiting()
 						resp(QNPayError.iapReceiptJsonError)
 						return
 					}
 					
 					self?.pay(order: order, payType: payType, receipt: receipt, resp: { (error) in
+						container?.endWaiting()
 						resp(error)
 					})
 				} else {
+					container?.endWaiting()
 					resp(receipt.1)
 				}
 			}
