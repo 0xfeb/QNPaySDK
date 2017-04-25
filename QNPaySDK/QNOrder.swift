@@ -20,6 +20,7 @@ public struct QNOrder {
 	public struct Create {
 		public var orderId:String
 		public var trust:String
+		public var valid:TimeInterval
 	}
 	
 	public struct Processing {
@@ -47,8 +48,8 @@ public struct QNOrder {
 		status = s
 		start = Start(appId: ai, originOrderId: ooi, uid: ui, content: c, price: p)
 		
-		if let oi = dict["orderId"] as? String, let t = dict["trust"] as? String {
-			create = Create(orderId: oi, trust: t)
+		if let oi = dict["orderId"] as? String, let t = dict["trust"] as? String, let ti = dict["valid"] as? Int {
+			create = Create(orderId: oi, trust: t, valid:Double(ti)*1000)
 		}
 		
 		if let pc = dict["pay_type"] as? [String:Any], let pt = QNPayType(dict: pc) {
@@ -74,6 +75,7 @@ public struct QNOrder {
 		if let create = create {
 			d["orderId"] = create.orderId
 			d["trust"] = create.trust
+			d["valid"] = create.valid
 		}
 		
 		if let processing = processing {
