@@ -13,7 +13,7 @@ public class QNOrderQueue {
 	public static var shareInstance:QNOrderQueue = { QNOrderQueue() }()
 	
 	public var waitingList:[QNOrder] = []
-	public var updateStateEvent:(QNOrder, String)->() = { _ in }
+	public var updateStateEvent:(QNOrder, Int)->() = { _ in }
 	
 	init() {}
 	
@@ -49,10 +49,8 @@ public class QNOrderQueue {
 		
 		let q = QNQuery.shareInstance
 		q.orderCheck(orderId: oid) {  [weak self, order, oid] (dict, error) in
-			if let dict = dict, let data = dict["data"] as? [String:Any], let status = data["status"] as? String {
-				self?.updateStateEvent(order, status)
-				
-				guard let state = Int(status) else { return }
+			if let dict = dict, let data = dict["data"] as? [String:Any], let state = data["status"] as? Int {
+				self?.updateStateEvent(order, state)
 				
 				if state == 9 {
 					NotificationCenter.send(Notification.Name.orderQueueSuccess, userInfo: order.dict)
@@ -136,7 +134,7 @@ public class QNOrderQueue {
 	}
 	
 	public func payIAP(order:QNOrder, aid:String, payType:String = "iap", container:UIView?, resp:@escaping(Error?)->()) {
-		container?.startWaiting(title: "等待苹果支付队列")
+		container?.startWaiting(title: "等待苹果支付")
 		
 		let  p = QNPay.shareInstance.pay
 		p.buyProduct(pid: aid) { [weak self, weak container] (result) in
