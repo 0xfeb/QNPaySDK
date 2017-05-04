@@ -177,9 +177,11 @@ public class QNOrderQueue {
 		let urlString = q.trustUrl(trust: trust, payType: payType)
 		guard let url = urlString.url else { return false }
 		
-		let wv = QNWebVC()
-		container.present(wv, animated: true) { 
-			wv.load(url: url)
+		OperationQueue.main.addOperation { [weak container] in
+			let wv = QNWebVC()
+			container?.present(wv, animated: true) {
+				wv.load(url: url)
+			}
 		}
 		return true
 	}
