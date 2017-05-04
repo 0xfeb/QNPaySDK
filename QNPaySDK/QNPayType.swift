@@ -14,11 +14,15 @@ public struct QNPayType {
 	public var content:String?
 	public var name:String?
 	
+	public var isIap:Bool {
+		return key == "iap"
+	}
+	
 	public init?(dict:[String:Any]) {
 		guard let k = dict["pay_type"] as? String else { return nil }
 		key = k
 		
-		if let u = dict["url"] as? Int {
+		if let u = dict["isUrl"] as? Int {
 			isUrl = u == 1
 		}
 		
@@ -43,7 +47,7 @@ public struct QNPayType {
 		var d:[String:Any] = [ "pay_type": key ]
 		
 		if let isUrl = isUrl {
-			d["url"] = isUrl
+			d["isUrl"] = isUrl
 		}
 		
 		if let content = content {
